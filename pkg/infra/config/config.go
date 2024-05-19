@@ -7,12 +7,17 @@ import (
 )
 
 type MongoCfg struct {
-	Uri     string        `mapstructure:"mongo_uri"`
-	Timeout time.Duration `mapstructure:"mongo_timeout"`
+	Uri     string        `mapstructure:"uri"`
+	Timeout time.Duration `mapstructure:"timeout"`
+}
+
+type AuthCfg struct {
+	PrivateKey string `mapstructure:"private_key"`
 }
 
 type Config struct {
-	Mongo             MongoCfg      `mapstructure:",squash"`
+	Mongo             MongoCfg      `mapstructure:"mongo"`
+	Auth              AuthCfg       `mapstructure:"auth"`
 	RecentItemsPeriod time.Duration `mapstructure:"recent_items_period"`
 	RecentUsersCount  int64         `mapstructure:"recent_users_count"`
 }
@@ -20,13 +25,23 @@ type Config struct {
 func Get() (*Config, error) {
 	config := new(Config)
 
-	viper.SetDefault("mongo_uri", "mongodb://localhost:27017")
-	viper.SetDefault("mongo_timeout", "10s")
+	viper.SetConfigType("hcl")
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+
+	viper.SetDefault("mongo.uri", "mongodb://localhost:27017")
+	viper.SetDefault("mongo.timeout", "10s")
+
+	viper.SetDefault("auth.esdca", "")
 
 	viper.SetDefault("recent_items_period", "72h")
 	viper.SetDefault("recent_users_count", 2)
 
 	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
+	}
 
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, err
