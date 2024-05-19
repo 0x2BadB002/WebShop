@@ -3,6 +3,7 @@ package config
 import (
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -22,9 +23,7 @@ type Config struct {
 	RecentUsersCount  int64         `mapstructure:"recent_users_count"`
 }
 
-func Get() (*Config, error) {
-	config := new(Config)
-
+func Read() {
 	viper.SetConfigType("hcl")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
@@ -32,7 +31,7 @@ func Get() (*Config, error) {
 	viper.SetDefault("mongo.uri", "mongodb://localhost:27017")
 	viper.SetDefault("mongo.timeout", "10s")
 
-	viper.SetDefault("auth.esdca", "")
+	viper.SetDefault("auth.private_key", "")
 
 	viper.SetDefault("recent_items_period", "72h")
 	viper.SetDefault("recent_users_count", 2)
@@ -40,8 +39,15 @@ func Get() (*Config, error) {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
+		log.Warn().Err(err).Send()
+		return
 	}
+
+	log.Info().Msgf("Using config file: %s", viper.ConfigFileUsed())
+}
+
+func Get() (*Config, error) {
+	config := new(Config)
 
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, err
