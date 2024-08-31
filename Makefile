@@ -1,10 +1,12 @@
 all: build
 
+name := shop
+
 build:
 	@echo "------------------"
 	@echo "Building app...   "
 	@echo "------------------"
-	go build -o shop main.go
+	go build -o $(name) ./cmd/shop/shop.go
 
 swag:
 	@echo "------------------"
@@ -19,7 +21,7 @@ lint:
 	golangci-lint run ./...
 
 clear:
-	rm shop *.out
+	rm $(name) *.out
 
 clean:
 	go clean -testcache
