@@ -1,8 +1,6 @@
 module github.com/Pavel7004/WebShop
 
-go 1.22
-
-toolchain go1.22.0
+go 1.23
 
 require (
 	github.com/Pavel7004/Common v0.0.0-20220306134122-e265e5f6cbec
