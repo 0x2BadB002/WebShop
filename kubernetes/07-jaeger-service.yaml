@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger
+  namespace: webshop
+  labels:
+    app: webshop
+    component: jaeger
+spec:
+  selector:
+    app: webshop
+    component: jaeger
+  ports:
+  - name: jaeger-ui
+    port: 16686
+    targetPort: 16686
+  - name: jaeger-agent
+    port: 6831
+    protocol: UDP
+    targetPort: 6831
+  - name: jaeger-binary
+    port: 6832
+    protocol: UDP
+    targetPort: 6832
+  - name: zipkin
+    port: 9411
+    targetPort: 9411
+  - name: jaeger-grpc
+    port: 14250
+    targetPort: 14250
+  - name: jaeger-http
+    port: 14268
+    targetPort: 14268
+  type: ClusterIP

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-app
+  namespace: webshop
+  labels:
+    app: webshop
+    component: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webshop
+      component: app
+  template:
+    metadata:
+      labels:
+        app: webshop
+        component: app
+    spec:
+      containers:
+      - name: webshop
+        image: webshop:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            configMapKeyRef:
+              name: webshop-config
+              key: mongo_uri
+        - name: JAEGER_AGENT_HOST
+          value: "jaeger"
+        - name: JAEGER_AGENT_PORT
+          value: "6831"
+        - name: JAEGER_SERVICE_NAME
+          value: "webshop"
+        livenessProbe:
+          httpGet:
+            path: /shop/v1/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /shop/v1/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      restartPolicy: Always
